@@ -1,0 +1,138 @@
+import java.util.*;
+
+class Cargo {
+    String name;
+    double weight;
+    double value;
+    int priority;
+    String truckName;  // To track which truck the cargo is assigned to
+    
+    public Cargo(String name, double weight, double value, int priority) {
+        this.name = name;
+        this.weight = weight;
+        this.value = value;
+        this.priority = priority;
+        this.truckName = "Not assigned";  // Initially no truck assigned
+    }
+
+    @Override
+    public String toString() {
+        return "Cargo Name: " + name + ", Weight: " + weight + ", Value: " + value + ", Priority: " + priority;
+    }
+}
+
+class Truck {
+    String model;
+    double capacity;
+    double totalLoad;
+    List<Cargo> cargos;
+    
+    public Truck(String model, double capacity) {
+        this.model = model;
+        this.capacity = capacity;
+        this.totalLoad = 0;
+        this.cargos = new ArrayList<>();
+    }
+    
+    public boolean addCargo(Cargo cargo) {
+        if (totalLoad + cargo.weight <= capacity) {
+            cargos.add(cargo);
+            totalLoad += cargo.weight;
+            cargo.truckName = this.model;  // Assign the truck to the cargo
+            return true;
+        }
+        return false;  // Not enough space
+    }
+
+    public String getRemainingSpace() {
+        return String.format("%.2f", capacity - totalLoad);
+    }
+
+    @Override
+    public String toString() {
+        return "Truck Model: " + model + ", Capacity: " + capacity + ", Total Load: " + totalLoad + ", Remaining Space: " + getRemainingSpace();
+    }
+
+    public void displayCargoDetails() {
+        System.out.println("Cargo Items in " + model + ":");
+        for (Cargo cargo : cargos) {
+            System.out.println(cargo);
+        }
+    }
+}
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        // Input for trucks
+        System.out.print("Enter the number of trucks: ");
+        int numTrucks = scanner.nextInt();
+        scanner.nextLine();  // Consume newline
+        
+        List<Truck> trucks = new ArrayList<>();
+        
+        for (int i = 0; i < numTrucks; i++) {
+            System.out.print("Enter truck model: ");
+            String truckModel = scanner.nextLine();
+            System.out.print("Enter " + truckModel + " truck capacity: ");
+            double truckCapacity = scanner.nextDouble();
+            scanner.nextLine();  // Consume newline
+            trucks.add(new Truck(truckModel, truckCapacity));
+        }
+        
+        // Input for cargos
+        System.out.print("Enter the number of cargos: ");
+        int numCargos = scanner.nextInt();
+        scanner.nextLine();  // Consume newline
+        
+        List<Cargo> cargos = new ArrayList<>();
+        
+        for (int i = 0; i < numCargos; i++) {
+            System.out.print("Enter cargo name: ");
+            String cargoName = scanner.nextLine();
+            System.out.print("Enter " + cargoName + " cargo weight: ");
+            double cargoWeight = scanner.nextDouble();
+            System.out.print("Enter " + cargoName + " cargo value: ");
+            double cargoValue = scanner.nextDouble();
+            System.out.print("Enter " + cargoName + " cargo priority: ");
+            int cargoPriority = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+            cargos.add(new Cargo(cargoName, cargoWeight, cargoValue, cargoPriority));
+        }
+        
+        // Sorting cargos based on priority (highest priority first)
+        cargos.sort((cargo1, cargo2) -> Integer.compare(cargo2.priority, cargo1.priority));
+        
+        // Loading cargos into trucks
+        for (Cargo cargo : cargos) {
+            boolean added = false;
+            for (Truck truck : trucks) {
+                if (truck.addCargo(cargo)) {
+                    System.out.println("Added cargo to " + truck.model + ": " + cargo);
+                    added = true;
+                    break;
+                }
+            }
+            if (!added) {
+                System.out.println("No space for cargo: " + cargo.name);
+            }
+        }
+        
+        // Displaying truck details and remaining space
+        System.out.println("\nTruck Information:");
+        for (Truck truck : trucks) {
+            System.out.println(truck);
+            truck.displayCargoDetails();
+            System.out.println();
+        }
+        
+        // Displaying cargo information
+        System.out.println("Cargo Information:");
+        for (Cargo cargo : cargos) {
+            System.out.println("Cargo Name: " + cargo.name + ", Assigned to Truck: " + cargo.truckName);
+        }
+        
+        scanner.close();
+    }
+}
